@@ -1,0 +1,25 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "",
+    "expandedProjectPaths": [
+    ],
+    "file.lastUsedOpenFilter": "All Files (*)",
+    "fileStates": {
+        "char1.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        }
+    },
+    "last.imagePath": "C:/Users/jmccracken/Desktop/run-escape/graphics/character/characters",
+    "openFiles": [
+        "char1.tsx"
+    ],
+    "project": "run-escape.tiled-project",
+    "recentFiles": [
+        "char1.tsx"
+    ],
+    "tileset.lastUsedFormat": "tsx"
+}
