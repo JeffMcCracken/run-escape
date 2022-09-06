@@ -11,7 +11,7 @@ class Game:
         pygame.display.set_caption('Run Escape')
         self.clock = pygame.time.Clock()
         all_sprites = pygame.sprite.Group()
-        self.player = Player((20, 20), all_sprites)
+        self.player = Player((SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2), all_sprites)
 
     def run(self):
         while True:

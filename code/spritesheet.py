@@ -8,10 +8,13 @@ class Spritesheet:
         self.sheet_width = self.sprite_sheet.get_width()
         self.sheet_height = self.sprite_sheet.get_height()
 
-    def get_sprite(self, x, y, w, h):
+    def get_sprite(self, x, y, w, h, spritesheets = None):
         sprite = pygame.Surface((w,h))
         sprite.set_colorkey((0,0,0))
         sprite.blit(self.sprite_sheet, (0,0), (x, y, w, h))
+        if spritesheets:
+            for spritesheet in spritesheets:
+                sprite.blit(spritesheet.sprite_sheet, (0,0), (x, y, w, h))
         sprite = pygame.transform.scale(sprite, (TILE_SIZE, TILE_SIZE))
         return sprite
 
@@ -25,5 +28,14 @@ class Spritesheet:
             for col in range(frame_cols):
                 frame = self.get_sprite(col*w, row*h, w, h)
                 frames.append(frame)
+
+        return frames
+    
+    def get_frames_row(self, row, frame_count, w, h, spritesheets = None):
+        frames = []
+
+        for col in range(frame_count):
+            frame = self.get_sprite(col*w, row*h, w, h, spritesheets)
+            frames.append(frame)
 
         return frames
