@@ -1,4 +1,4 @@
-import pygame, sys, time
+import pygame, sys
 
 from settings import *
 from player import Player
@@ -14,7 +14,7 @@ class Game:
         all_sprites = pygame.sprite.Group()
         self.player = Player((SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2), all_sprites)
         self.character_creation = CharacterCreation()
-        self.state = 'character_create'
+        self.state = 'main_game'
         
     def character_create(self):
         for event in pygame.event.get():

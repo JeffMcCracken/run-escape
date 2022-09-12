@@ -13,11 +13,14 @@ class Player(pygame.sprite.Sprite):
         self.animation_speed = 8
 
         # character customization
-        self.spritesheet = Spritesheet('../graphics/character/characters/char1.png')
-        self.shirt = Spritesheet('../graphics/character/clothes/basic.png')
-        self.pants = Spritesheet('../graphics/character/clothes/pants.png')
-        self.hair = Spritesheet('../graphics/character/hair/curly.png')
+        self.spritesheet = Spritesheet('../graphics/character/characters/char_all.png')
+        self.shirt = Spritesheet('../graphics/character/clothes/shirts/floral.png')
+        self.pants = Spritesheet('../graphics/character/clothes/pants/pants.png')
+        self.hair = Spritesheet('../graphics/character/hair/curly.png', 11)
         self.shoes = Spritesheet('../graphics/character/clothes/shoes.png')
+        self.eyes = Spritesheet('../graphics/character/eyes/eyes.png')
+        self.acc = Spritesheet('../graphics/character/acc/beard.png')
+        self.customizations = [self.shirt, self.pants, self.hair, self.shoes, self.eyes, self.acc]
         self.setup_frames()
 
         # set image and pos
@@ -36,9 +39,10 @@ class Player(pygame.sprite.Sprite):
         for animation in CHARACTER_ANIMATIONS:
             row = CHARACTER_ANIMATIONS[animation][0]
             frame_count = CHARACTER_ANIMATIONS[animation][1]
+            max_frames = CHARACTER_ANIMATIONS[animation][2]
 
             self.frames[animation] = self.spritesheet.get_frames_row(
-                row, frame_count, SPRITESHEET_WIDTH, SPRITESHEET_HEIGHT, [self.shirt, self.pants, self.hair, self.shoes]
+                row, frame_count, max_frames, SPRITESHEET_WIDTH, SPRITESHEET_HEIGHT, self.customizations
             )
 
     def input(self):
