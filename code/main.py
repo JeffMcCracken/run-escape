@@ -14,7 +14,7 @@ class Game:
         all_sprites = pygame.sprite.Group()
         self.player = Player((SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2), all_sprites)
         self.character_creation = CharacterCreation()
-        self.state = 'main_game'
+        self.state = 'character_create'
         
     def character_create(self):
         for event in pygame.event.get():
