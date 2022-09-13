@@ -86,6 +86,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.centery = round(self.pos.y)
 
     def get_status(self):
+        print(pygame.time.get_ticks())
         if self.direction.magnitude() == 0:
             self.status = self.status.split('_')[0] + '_idle'
                 

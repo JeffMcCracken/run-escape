@@ -13,7 +13,7 @@ class Game:
         self.clock = pygame.time.Clock()
         all_sprites = pygame.sprite.Group()
         self.player = Player((SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2), all_sprites)
-        self.character_creation = CharacterCreation()
+        self.character_creation = CharacterCreation(all_sprites)
         self.state = 'character_create'
         
     def character_create(self):

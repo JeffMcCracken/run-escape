@@ -1,6 +1,8 @@
 import pygame
 from settings import *
 from spritesheet import Spritesheet
+from sprites import Arrow
+from timer import Timer
 
 SHIRTS = [
     'basic.png',
@@ -11,7 +13,7 @@ SHIRTS = [
     'skull.png',
     'spaghetti.png',
     'sporty.png',
-    'string.png',
+    'stripe.png',
     'suit.png'
 ]
 
@@ -46,21 +48,27 @@ HATS = [
     'hat_pumpkin_purple.png',
     'hat_pumpkin.png',
     'hat_witch.png',
-    'hat_clown_blue.png',
-    'hat_clown_red.png',
-    'hat_spooky.png',
+    'mask_clown_blue.png',
+    'mask_clown_red.png',
+    'mask_spooky.png',
+]
+
+BEARDS = [
+    'none',
+    ''
 ]
 
 class CharacterCreation:
-    def __init__(self):
+    def __init__(self, all_sprites):
         # setup
         self.display_surface = pygame.display.get_surface()
         self.font = pygame.font.Font('../font/Habbo.ttf', 40)
-        self.arrow_left = pygame.image.load('../graphics/icons/arrow_left.png').convert_alpha()
-        self.arrow_right = pygame.image.load('../graphics/icons/arrow_right.png').convert_alpha()
         self.margin = 200
+        self.all_sprites = all_sprites
+        self.arrow_sprites = pygame.sprite.Group()
+        self.timer = Timer(200)
         
-        # background:
+        # background
         self.width = SCREEN_WIDTH - 100
         self.height = SCREEN_HEIGHT - 100
         self.top = SCREEN_HEIGHT // 2 - self.height // 2
@@ -68,33 +76,22 @@ class CharacterCreation:
         self.bg_rect = pygame.Rect(self.left, self.top, self.width, self.height)
 
         # player skin path and color
-        self.skin = ['../graphics/character/characters/char_all.png', 0]
+        self.skin_color = 0
+        self.skin = ['../graphics/character/characters/char_all.png', self.skin_color]
 
-        # player asset paths
-        self.shoe_path = '../graphics/character/clothes/shoes.png'
-        self.eye_path = '../graphics/character/eyes/eyes.png'
-        self.beard_path = '../graphics/character/acc/beard.png'
-        self.shirt_path = '../graphics/character/clothes/shirts/'
-        self.pants_path = '../graphics/character/clothes/pants/'
-        self.hair_path = '../graphics/character/hair/'
-        self.hat_path = '../graphics/character/acc/hats/'
+        # All file paths with name
+        self.character_assets = {
+            'shoe': CharacterAsset('shoe', '../graphics/character/clothes/shoes.png'),
+            'eye': CharacterAsset('eye', '../graphics/character/eyes/eyes.png'),
+            'shirt': CharacterAsset('shirt', '../graphics/character/clothes/shirts/', SHIRTS),
+            'pants': CharacterAsset('pants', '../graphics/character/clothes/pants/', PANTS),
+            'hair': CharacterAsset('hair', '../graphics/character/hair/', HAIR),
+            'beard': CharacterAsset('beard', '../graphics/character/acc/beard.png', BEARDS),
+            'hat': CharacterAsset('hat', '../graphics/character/acc/hats/', HATS)
+        }
 
-        # default chosen assets
-        self.shirt = SHIRTS[0]
-        self.pants = PANTS[0]
-        self.hair = HAIR[0]
-        self.hat = HATS[0]
-
-        # All file paths with chose, color
-        self.character_assets = [
-            [self.shoe_path, 0, 'Shoes'],
-            [self.eye_path, 0, 'Eyes'],
-            [self.shirt_path + self.shirt, 0, 'Shirt'],
-            [self.pants_path + self.pants, 0, 'Pants'],
-            [self.hair_path + self.hair, 0, 'Hair'],
-            [self.beard_path, 0, 'Beard'],
-            [self.hat_path + self.hat, 0, 'Hat']
-        ]
+        # Setup controls
+        self.setup()
 
         
     def preview(self):
@@ -104,37 +101,95 @@ class CharacterCreation:
         # create asset spritesheets
         assets = []
         asset_offsets = []
-        for asset in self.character_assets:
-            if 'none' in asset[0]:
+        for asset in self.character_assets.values():
+            if 'none' in asset.asset_path:
                 continue
-            assets.append(Spritesheet(asset[0]))
-            asset_offsets.append(asset[1])
+            assets.append(Spritesheet(asset.asset_path))
+            asset_offsets.append(asset.color_shift)
 
         # Make preview of character and upscale
         preview_surf = skin.get_sprite(0, 0, SPRITESHEET_WIDTH, SPRITESHEET_HEIGHT, assets, asset_offsets)   
         preview_surf = pygame.transform.scale(preview_surf, (preview_surf.get_width() * 2, preview_surf.get_height() * 2))
         preview_rect = preview_surf.get_rect(topleft=(self.left + self.margin // 2 + 70, self.top + 20))
         
+        # Display background
+        preview_bg_rect = pygame.Rect(preview_rect.x, preview_rect.y, preview_surf.get_width(), preview_surf.get_height())
+        pygame.draw.rect(self.display_surface, 'White', preview_bg_rect)
+
         # Display character
         self.display_surface.blit(preview_surf, preview_rect)
-        
+
     def options(self):
-        for i, asset in enumerate(self.character_assets):
-            top = self.top + 180 + (i * 40)
+        options_bg_rect = pygame.Rect(self.left + 100, self.top + 180, 300, 400)
+        pygame.draw.rect(self.display_surface, 'White', options_bg_rect)
+        num_skipped = 0
+
+        for i, asset in enumerate(self.character_assets.values()):
+            if not asset.options:
+                num_skipped += 1
+                continue
+            top = self.top + 180 + (i * 40) - (num_skipped * 40)
             left = self.left + self.margin
             
-            text_surf = self.font.render(asset[2], False, 'Black')
+            text_surf = self.font.render(asset.display_text, False, 'Black')
             text_rect = text_surf.get_rect(topleft=(left, top))
             
-            left_arrow_rect = self.arrow_left.get_rect(topright=(left - 20, top))
-            right_arrow_rect = self.arrow_right.get_rect(topleft=(left + text_surf.get_width() + 20, top))
+            left_arrow = Arrow((left - 58, top), [self.all_sprites, self.arrow_sprites], 'left', asset.name)
+            right_arrow = Arrow((left + text_surf.get_width() + 20, top), [self.all_sprites, self.arrow_sprites], 'right', asset.name)
             
-            self.display_surface.blit(self.arrow_left, left_arrow_rect)
-            self.display_surface.blit(self.arrow_right, right_arrow_rect)
+            self.display_surface.blit(left_arrow.surf, left_arrow.rect)
+            self.display_surface.blit(right_arrow.surf, right_arrow.rect)
             self.display_surface.blit(text_surf, text_rect)
 
-    def update(self):
+    def setup(self):
         pygame.draw.rect(self.display_surface, 'White', self.bg_rect, 0, 4)
         self.preview()
         self.options()
         
+
+    def input(self):
+        for sprite in self.arrow_sprites.sprites():
+            if sprite.hitbox.collidepoint(pygame.mouse.get_pos()):
+                mouse = pygame.mouse.get_pressed()
+                if mouse[0] and not self.timer.active:
+                    self.timer.activate()
+                    if sprite.direction == 'right':
+                        self.press_right(self.character_assets[sprite.name])
+                    else:
+                        self.press_left(self.character_assets[sprite.name])
+                    
+                    self.character_assets[sprite.name].update()
+                    self.preview()
+                    self.options()
+            
+
+    def press_right(self, asset):
+        if asset.chosen_asset == len(asset.options) - 1:
+            asset.chosen_asset = 0
+        else:
+            asset.chosen_asset += 1
+
+    def press_left(self, asset):
+        if asset.chosen_asset == 0:
+            asset.chosen_asset = len(asset.options) - 1
+        else:
+            asset.chosen_asset -= 1
+
+    def update(self):
+        self.timer.update()
+        self.input()
+
+class CharacterAsset():
+    def __init__(self, name, base_path, options=[], chosen_asset=0, color_shift=0):
+        self.base_path = base_path
+        self.chosen_asset = chosen_asset
+        self.options = options
+        self.asset_path = self.base_path + self.options[self.chosen_asset] if self.options else self.base_path
+        self.color_shift = color_shift
+        self.name = name
+        self.num_colors = 1 if self.name == 'hat' else 10
+        self.display_text = f'{self.name} {self.chosen_asset + 1}' if self.options else self.name
+
+    def update(self):
+        self.asset_path = self.base_path + self.options[self.chosen_asset] if self.options else self.base_path
+        self.display_text = f'{self.name} {self.chosen_asset + 1}' if self.options else self.name
